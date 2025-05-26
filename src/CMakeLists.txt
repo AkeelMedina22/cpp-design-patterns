@@ -1,12 +1,9 @@
-add_library(matrix_core
-    SHARED
-    matrix_core/cpu_multiplier.cpp
-)
+add_library(matrix_core SHARED)
 
 target_sources(matrix_core PRIVATE
-    matrix_core/singleton_manager.cpp
-    matrix_core/factories.cpp
-    matrix_core/multiplier_registry.cpp
+    matrix_core/cpu_multiplier.cpp
+    patterns/factory.cpp
+    patterns/multiplier_registry.cpp
 )
 
 target_include_directories(matrix_core
@@ -14,6 +11,7 @@ target_include_directories(matrix_core
         ${CMAKE_SOURCE_DIR}/include
     PRIVATE
         matrix_core
+        patterns
 )
 
 target_link_libraries(matrix_core

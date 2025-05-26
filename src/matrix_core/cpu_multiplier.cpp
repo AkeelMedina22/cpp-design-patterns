@@ -1,9 +1,9 @@
-#include "cpu_multiplier.hpp"
 #include <Eigen/Dense>
+#include "cpu_multiplier.hpp"
 
 namespace MatrixTransform {
     
-    Matrix CpuMultiplier::multiply(const Matrix& a, const Matrix& b) {
+    Matrix CPUMultiplier::multiply(const Matrix& a, const Matrix& b) {
         if (a.cols() != b.rows()) {
             throw std::invalid_argument("Matrix dimensions do not match for multiplication.");
         }

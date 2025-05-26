@@ -3,7 +3,7 @@
 
 namespace MatrixTransform {
 
-    class CpuMultiplier : public IMultiplier {
+    class CPUMultiplier : public IMultiplier {
     public:
         Matrix multiply(const Matrix& a, const Matrix& b) override;
     };

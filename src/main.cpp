@@ -8,7 +8,7 @@ using MatrixTransform::Factory;
 
 int main(int argc, char const *argv[])
 {
-    auto multiplier = Factory::createMultiplier("cpu");
+    auto multiplier = Factory::createMultiplier("CPU");
     Matrix a(2, 2);
     Matrix b(2, 2);
     

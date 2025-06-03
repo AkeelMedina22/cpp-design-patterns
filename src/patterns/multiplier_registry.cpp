@@ -16,9 +16,9 @@ namespace MatrixTransform {
     }
 
     bool MultiplierRegistry::registerMultiplier(const std::string& key, std::function<std::unique_ptr<IMultiplier>()> creator){
-        auto result = creatorMap_.emplace(key, std::move(creator));
-        if (!result.second) {
-            creatorMap_[key] = std::move(result.first->second); 
+        auto [iterator, inserted] = creatorMap_.try_emplace(key, std::move(creator));
+        if (!inserted) { 
+            iterator->second = std::move(creator);
         }
         return true;
     } 

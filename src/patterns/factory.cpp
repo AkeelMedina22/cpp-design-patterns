@@ -7,8 +7,8 @@
 
 namespace MatrixTransform {
         
-    std::unique_ptr<MatrixTransform::IMultiplier> Factory::createMultiplier(const std::string& type) {
-        return MultiplierRegistry::getInstance().createMultiplier(type);
+    std::unique_ptr<MatrixTransform::IMultiplier> Factory::createMultiplier(const std::string& config) {
+        return MultiplierRegistry::getInstance().createMultiplier(config);
     }
 
 } // namespace MatrixTransform

@@ -10,7 +10,8 @@ namespace MatrixTransform {
         Factory(const Factory&) = delete;
         Factory& operator=(const Factory&) = delete;
         
-        static std::unique_ptr<IMultiplier> createMultiplier(const std::string& config);
+        static std::unique_ptr<IMultiplier> createMultiplier();
+        static std::unique_ptr<IMultiplier> createMultiplier(const std::string& configFilePath);
     };
 
 } // namespace MatrixTransform

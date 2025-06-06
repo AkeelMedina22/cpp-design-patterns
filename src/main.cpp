@@ -1,8 +1,6 @@
 #include <memory>
 #include <iostream>
 #include <string>
-#include <fstream>
-#include "nlohmann/json.hpp"
 #include "matrix_transform/matrix_types.hpp"
 #include "matrix_transform/interfaces.hpp"
 #include "matrix_transform/factory.hpp"
@@ -22,27 +20,8 @@ int main(int argc, char const *argv[])
         return 1; 
     }
 
-    std::ifstream configFileStream(configFilePath);
-    if (!configFileStream.is_open()) {
-        std::cerr << "Error: Could not open config file: " << configFilePath << std::endl;
-        return 1;
-    }
-
-    nlohmann::json configJson;
     std::unique_ptr<MatrixTransform::IMultiplier> multiplier;
-    try {
-        configFileStream >> configJson;
-        std::string multiplierType = configJson.value("backend", "CPU");
-        multiplier = MatrixTransform::Factory::createMultiplier(multiplierType);
-    } catch (const std::exception& e) {
-        std::cerr << "Error parsing JSON from " << configFilePath << ": " << e.what() << std::endl;
-        return 1;
-    }
-
-    if (!multiplier) {
-        std::cerr << "Error: Could not create multiplier of type: " << configJson.value("backend", "CPU") << std::endl;
-        return 1;
-    }
+    multiplier = MatrixTransform::Factory::createMultiplier(configFilePath);
 
     Matrix a(2, 2);
     Matrix b(2, 2);

@@ -1,0 +1,54 @@
+# --- Build artifacts ---
+# Ignore the build directory where all compilation outputs go.
+/build/
+
+# Ignore other common build-related directories.
+/install/
+/bin/
+/lib/
+/out/
+*_build/
+cmake-build-*/
+
+# --- Compiled files ---
+# Ignore object files, libraries, and executables that might be created
+# outside the build directory by mistake.
+*.o
+*.a
+*.so
+*.so.*
+*.dll
+*.lib
+*.exe
+*.out
+
+# --- IDE & Editor specific files ---
+# Visual Studio Code
+.vscode/
+
+# CLion
+.idea/
+
+# Visual Studio
+*.sln
+*.vcxproj
+*.vcxproj.filters
+*.user
+*.suo
+x64/
+x86/
+Debug/
+Release/
+
+# --- Other common ignores ---
+# Log files, temporary files, etc.
+*.log
+*.tmp
+*.bak
+
+# OS-specific files
+# macOS
+.DS_Store
+
+# Windows
+Thumbs.db

@@ -3,6 +3,7 @@
 #include <string>
 #include <fstream>
 #include "nlohmann/json.hpp"
+#include "logger.hpp"
 #include "cpu_multiplier.hpp"
 #include "multiplier_registry.hpp"
 #include "matrix_transform/interfaces.hpp"
@@ -24,9 +25,21 @@ namespace MatrixTransform {
 
         nlohmann::json configJson;
         std::unique_ptr<MatrixTransform::IMultiplier> multiplier;
+
         try {
             configFileStream >> configJson;
+
+            std::string logLevelStr = configJson.value("log_level", "info");
+            Logger::getInstance().setLevel(logLevelStr);
+
+            if (configJson.is_null()) {
+                Logger::getInstance().log(LogLevel::Error, "Failed to parse JSON from " + configFilePath);
+                throw std::runtime_error("Config file is empty or contains only null.");
+            }
+
             std::string multiplierType = configJson.value("backend", "CPU");
+            Logger::getInstance().log(LogLevel::Info, "Creating backend: " + multiplierType);
+
             multiplier = MultiplierRegistry::getInstance().createMultiplier(multiplierType);
         } catch (const std::exception& e) {
             throw std::runtime_error("Error parsing JSON from " + configFilePath + ": " + e.what());

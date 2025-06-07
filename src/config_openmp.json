@@ -1,0 +1,10 @@
+{
+  "backend": "OpenMP",
+  "log_level": "debug",
+  "openmp_options": 
+    {
+        "threads": 8,
+        "schedule": "dynamic",
+        "chunk_size": 16
+    }
+}

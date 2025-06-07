@@ -4,6 +4,7 @@ target_sources(matrix_core PRIVATE
     matrix_core/cpu_multiplier.cpp
     patterns/factory.cpp
     patterns/multiplier_registry.cpp
+    utils/logger.cpp
 )
 
 target_include_directories(matrix_core
@@ -12,6 +13,7 @@ target_include_directories(matrix_core
     PRIVATE
         matrix_core
         patterns
+        utils
 )
 
 add_library(NlohmannJson INTERFACE) 

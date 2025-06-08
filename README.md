@@ -48,13 +48,17 @@ Alternatively, you can simply run `make` to use the default configuration.
 
 ## How to Use 
 ```cpp
+#include <memory>
+#include <iostream>
+#include <string>
 #include "matrix_transform/matrix_types.hpp"
 #include "matrix_transform/interfaces.hpp"
 #include "matrix_transform/factory.hpp"
 
 using MatrixTransform::Factory;
 // ...
-auto multiplier = Factory::createMultiplier("../src/config.json");
+str::string configFilePath = argv[1]; 
+auto multiplier = Factory::createMultiplier(configFilePath);
 Matrix a = /* ... */;
 Matrix b = /* ... */;
 Matrix result = multiplier->multiply(a, b);

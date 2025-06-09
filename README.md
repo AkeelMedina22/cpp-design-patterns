@@ -44,8 +44,6 @@ A matrix multiplication library written in C++. This project serves as a learnin
     src/matrix_app ../src/config_cpu.json
     ```
 
-Alternatively, you can simply run `make` to use the default configuration.
-
 ## How to Use 
 ```cpp
 #include <memory>

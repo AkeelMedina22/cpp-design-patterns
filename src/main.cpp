@@ -21,7 +21,7 @@ int main(int argc, char const *argv[])
     }
 
     std::unique_ptr<MatrixTransform::IMultiplier> multiplier;
-    multiplier = MatrixTransform::Factory::createMultiplier(configFilePath);
+    multiplier = Factory::createMultiplier(configFilePath);
 
     Matrix a(2, 2);
     Matrix b(2, 2);

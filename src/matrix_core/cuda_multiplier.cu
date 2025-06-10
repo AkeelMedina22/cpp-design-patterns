@@ -28,35 +28,46 @@ namespace MatrixTransform {
 
     template <int TILE_WIDTH>
     __global__ void matmul_kernel(float* d_C, const float* d_A, const float* d_B, int rowsA, int colsA, int colsB) {
-        
         int row = blockIdx.y * TILE_WIDTH + threadIdx.y;
         int col = blockIdx.x * TILE_WIDTH + threadIdx.x;
 
         __shared__ float tile_A[TILE_WIDTH][TILE_WIDTH];
         __shared__ float tile_B[TILE_WIDTH][TILE_WIDTH];
 
-        float sum;
+        float sum = 0.0f;
 
-        for (int k = 0; k < colsA / TILE_WIDTH; ++k){
-            int Ax = blockIdx.y * TILE_WIDTH + threadIdx.y;
-            int Ay = k * TILE_WIDTH + threadIdx.x;
+        for (int tile_num = 0; tile_num < (colsA + TILE_WIDTH - 1) / TILE_WIDTH; ++tile_num) {
 
-            int Bx = k * TILE_WIDTH + threadIdx.y;
-            int By = blockIdx.x * TILE_WIDTH + threadIdx.x;
+            int source_A_row = row;
+            int source_A_col = tile_num * TILE_WIDTH + threadIdx.x;
 
-            tile_A[threadIdx.y][threadIdx.x] = d_A[Ax * colsA + Ay];
-            tile_B[threadIdx.y][threadIdx.x] = d_B[Bx * colsB + By];
+            int source_B_row = tile_num * TILE_WIDTH + threadIdx.y;
+            int source_B_col = col;
+
+            if (source_A_row < rowsA && source_A_col < colsA) {
+                tile_A[threadIdx.y][threadIdx.x] = d_A[source_A_col * rowsA + source_A_row];
+            } else {
+                tile_A[threadIdx.y][threadIdx.x] = 0.0f;
+            }
+
+            if (source_B_row < colsA && source_B_col < colsB) {
+                tile_B[threadIdx.y][threadIdx.x] = d_B[source_B_col * colsA + source_B_row];
+            } else {
+                tile_B[threadIdx.y][threadIdx.x] = 0.0f;
+            }
 
             __syncthreads();
 
-            for (int k = 0; k < TILE_WIDTH; ++k) {
-                sum += tile_A[threadIdx.y][k] * tile_B[k][threadIdx.x];
+            for (int inner_k = 0; inner_k < TILE_WIDTH; ++inner_k) {
+                sum += tile_A[threadIdx.y][inner_k] * tile_B[inner_k][threadIdx.x];
             }
 
             __syncthreads();
         }
 
-        d_C[row * colsB + col] = sum;
+        if (row < rowsA && col < colsB) {
+            d_C[col * rowsA + row] = sum;
+        }
     }
         
     Matrix CUDAMultiplier::multiply(const Matrix& a, const Matrix& b) {
@@ -92,13 +103,15 @@ namespace MatrixTransform {
                         (c.rows() + threadsPerBlock.y - 1) / threadsPerBlock.y );
 
         Logger::getInstance().log(LogLevel::Debug, "Launching matmul kernel...");
-        matmul_kernel<32><<<numBlocks, threadsPerBlock>>>(d_C, d_A, d_B, a.rows(), a.cols(), b.cols());
+        matmul_kernel<TILE_WIDTH><<<numBlocks, threadsPerBlock>>>(d_C, d_A, d_B, a.rows(), a.cols(), b.cols());
 
         gpuErrchk(cudaGetLastError());
         gpuErrchk(cudaDeviceSynchronize()); 
 
         Logger::getInstance().log(LogLevel::Debug, "Copying result matrix from GPU...");
         gpuErrchk(cudaMemcpy(c.data(), d_C, d_C_bytes, cudaMemcpyDeviceToHost));
+
+        gpuErrchk(cudaDeviceSynchronize());
 
         Logger::getInstance().log(LogLevel::Debug, "Freeing GPU memory...");
         gpuErrchk(cudaFree(d_A));

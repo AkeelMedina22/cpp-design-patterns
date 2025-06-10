@@ -1,4 +1,4 @@
-// #ifdef WITH_CUDA
+#ifdef WITH_CUDA
 
 #include <Eigen/Dense>
 #include <iostream>
@@ -124,4 +124,4 @@ namespace MatrixTransform {
 
 } // namespace MatrixTransform
 
-// #endif
+#endif

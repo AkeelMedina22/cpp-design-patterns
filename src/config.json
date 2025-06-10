@@ -1,0 +1,4 @@
+{
+  "backend": "CUDA",
+  "log_level": "Debug"
+}

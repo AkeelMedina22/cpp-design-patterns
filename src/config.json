@@ -1,4 +1,4 @@
 {
-  "backend": "CUDA",
-  "log_level": "Debug"
+  "backend": "cuBLAS",
+  "log_level": "debug"
 }

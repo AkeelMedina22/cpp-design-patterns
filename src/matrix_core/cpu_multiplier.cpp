@@ -1,3 +1,6 @@
+#define EIGEN_DONT_PARALLELIZE
+#define EIGEN_DONT_VECTORIZE
+
 #include <Eigen/Dense>
 #include "logger.hpp"
 #include "cpu_multiplier.hpp"

@@ -4,6 +4,7 @@ project(mmult_design VERSION 1.0 LANGUAGES CXX CUDA)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -mavx2")
 
 option(ENABLE_OPENMP "Build with OpenMP support" ON)
 option(ENABLE_CUDA "Build with CUDA support" OFF)

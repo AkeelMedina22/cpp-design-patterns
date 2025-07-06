@@ -4,7 +4,6 @@
 #include <fstream>
 #include "nlohmann/json.hpp"
 #include "logger.hpp"
-#include "cpu_multiplier.hpp"
 #include "multiplier_registry.hpp"
 #include "matrix_transform/interfaces.hpp"
 #include "matrix_transform/factory.hpp"

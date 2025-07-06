@@ -3,7 +3,7 @@
 
 namespace MatrixTransform {
 
-    class AVX2Multiplier : public IMultiplier {
+    class OMPAVX2Multiplier : public IMultiplier {
     public:
         Matrix multiply(const Matrix& a, const Matrix& b) override;
     };

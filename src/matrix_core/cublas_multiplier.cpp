@@ -7,6 +7,7 @@
 #include <cublas_v2.h> 
 #include <iostream>
 #include <memory>
+#include <chrono>
 
 namespace MatrixTransform {
 
@@ -43,9 +44,11 @@ namespace MatrixTransform {
             throw std::invalid_argument("Matrix dimensions do not match for multiplication.");
         }
 
+        std::chrono::high_resolution_clock::time_point copy_to_start = std::chrono::high_resolution_clock::now();
+        
         cublasHandle_t handle;
         cuBLASErrchk(cublasCreate(&handle));
-
+        
         float *d_A, *d_B, *d_C; 
         size_t d_A_bytes = a.rows() * a.cols() * sizeof(float);
         size_t d_B_bytes = b.rows() * b.cols() * sizeof(float);
@@ -59,11 +62,17 @@ namespace MatrixTransform {
         Logger::getInstance().log(LogLevel::Debug, "Copying matrices to GPU...");
         cuBLASErrchk(cublasSetMatrix(a.rows(), a.cols(), sizeof(float), a.data(), a.rows(), d_A, a.rows()));
         cuBLASErrchk(cublasSetMatrix(b.rows(), b.cols(), sizeof(float), b.data(), b.rows(), d_B, b.rows()));
-        
+
+        std::chrono::high_resolution_clock::time_point copy_to_end = std::chrono::high_resolution_clock::now();
+        auto copy_to_duration = std::chrono::duration_cast<std::chrono::milliseconds>(copy_to_end - copy_to_start).count();
+        Logger::getInstance().log(LogLevel::Info, "Initialization complete in -> " + std::to_string(copy_to_duration) + " milliseconds.");
+
         Logger::getInstance().log(LogLevel::Debug, "Calling cublasSgemm...");
         
         const float alpha = 1.0f; 
         const float beta = 0.0f; 
+
+        std::chrono::high_resolution_clock::time_point mult_start = std::chrono::high_resolution_clock::now();
 
         cuBLASErrchk(cublasSgemm(handle,
                                  CUBLAS_OP_N, // Operation on A: No transpose
@@ -81,9 +90,18 @@ namespace MatrixTransform {
                                  a.rows()     // Leading dimension of C (ldc)
                                  ));
 
+        std::chrono::high_resolution_clock::time_point mult_end = std::chrono::high_resolution_clock::now();
+        auto mult_duration = std::chrono::duration_cast<std::chrono::milliseconds>(mult_end - mult_start).count();
+        Logger::getInstance().log(LogLevel::Info, "cuBLAS multiplication complete in -> " + std::to_string(mult_duration) + " milliseconds.");
+        
+        std::chrono::high_resolution_clock::time_point copy_back_start = std::chrono::high_resolution_clock::now();
         Matrix c(a.rows(), b.cols());
         Logger::getInstance().log(LogLevel::Debug, "Copying result from GPU...");
         cuBLASErrchk(cublasGetMatrix(c.rows(), c.cols(), sizeof(float), d_C, c.rows(), c.data(), c.rows()));
+
+        std::chrono::high_resolution_clock::time_point copy_back_end = std::chrono::high_resolution_clock::now();
+        auto copy_back_duration = std::chrono::duration_cast<std::chrono::milliseconds>(copy_back_end - copy_back_start).count();
+        Logger::getInstance().log(LogLevel::Info, "Copy results back to CPU complete in -> " + std::to_string(copy_back_duration) + " milliseconds.");
 
         Logger::getInstance().log(LogLevel::Debug, "Freeing GPU memory and cuBLAS handle...");
         gpuErrchk(cudaFree(d_A));

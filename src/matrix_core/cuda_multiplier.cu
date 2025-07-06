@@ -6,6 +6,7 @@
 #include "logger.hpp"
 #include "cuda_multiplier.hpp"
 #include "multiplier_registry.hpp"
+#include <chrono>
 
 namespace MatrixTransform {
 
@@ -84,6 +85,8 @@ namespace MatrixTransform {
         size_t d_A_bytes = a.rows() * a.cols() * sizeof(float);
         size_t d_B_bytes = b.rows() * b.cols() * sizeof(float);
         size_t d_C_bytes = c.rows() * c.cols() * sizeof(float);
+
+        std::chrono::high_resolution_clock::time_point copy_to_start = std::chrono::high_resolution_clock::now();
         
         Logger::getInstance().log(LogLevel::Debug, "Allocating memory on GPU...");
         gpuErrchk(cudaMalloc(&d_A, d_A_bytes));
@@ -97,21 +100,37 @@ namespace MatrixTransform {
         Logger::getInstance().log(LogLevel::Debug, "Zeroing out device result matrix C...");
         gpuErrchk(cudaMemset(d_C, 0, d_C_bytes));
 
+        std::chrono::high_resolution_clock::time_point copy_to_end = std::chrono::high_resolution_clock::now();
+        auto copy_to_duration = std::chrono::duration_cast<std::chrono::milliseconds>(copy_to_end - copy_to_start).count();
+        Logger::getInstance().log(LogLevel::Info, "Initialization complete in -> " + std::to_string(copy_to_duration) + " milliseconds.");
+
         constexpr int TILE_WIDTH = 16;
         dim3 threadsPerBlock(TILE_WIDTH, TILE_WIDTH);
         dim3 numBlocks( (c.cols() + threadsPerBlock.x - 1) / threadsPerBlock.x,
                         (c.rows() + threadsPerBlock.y - 1) / threadsPerBlock.y );
 
         Logger::getInstance().log(LogLevel::Debug, "Launching matmul kernel...");
-        matmul_kernel<TILE_WIDTH><<<numBlocks, threadsPerBlock>>>(d_C, d_A, d_B, a.rows(), a.cols(), b.cols());
 
+        std::chrono::high_resolution_clock::time_point mult_start = std::chrono::high_resolution_clock::now();
+        matmul_kernel<TILE_WIDTH><<<numBlocks, threadsPerBlock>>>(d_C, d_A, d_B, a.rows(), a.cols(), b.cols());
+        
         gpuErrchk(cudaGetLastError());
-        gpuErrchk(cudaDeviceSynchronize()); 
+        gpuErrchk(cudaDeviceSynchronize());
+
+        std::chrono::high_resolution_clock::time_point mult_end = std::chrono::high_resolution_clock::now();
+        auto mult_duration = std::chrono::duration_cast<std::chrono::milliseconds>(mult_end - mult_start).count();
+        Logger::getInstance().log(LogLevel::Info, "CUDA multiplication complete in -> " + std::to_string(mult_duration) + " milliseconds.");
+
+        std::chrono::high_resolution_clock::time_point copy_back_start = std::chrono::high_resolution_clock::now();
 
         Logger::getInstance().log(LogLevel::Debug, "Copying result matrix from GPU...");
         gpuErrchk(cudaMemcpy(c.data(), d_C, d_C_bytes, cudaMemcpyDeviceToHost));
 
         gpuErrchk(cudaDeviceSynchronize());
+
+        std::chrono::high_resolution_clock::time_point copy_back_end = std::chrono::high_resolution_clock::now();
+        auto copy_back_duration = std::chrono::duration_cast<std::chrono::milliseconds>(copy_back_end - copy_back_start).count();
+        Logger::getInstance().log(LogLevel::Info, "Copy results back to CPU complete in -> " + std::to_string(copy_back_duration) + " milliseconds.");
 
         Logger::getInstance().log(LogLevel::Debug, "Freeing GPU memory...");
         gpuErrchk(cudaFree(d_A));

@@ -20,15 +20,6 @@ target_include_directories(NlohmannJson INTERFACE
 )
 target_link_libraries(matrix_core PUBLIC eigen NlohmannJson)
 
-
-if(ENABLE_OPENMP)
-    message(STATUS "Configuring OpenMP backend for matrix_core")
-    target_sources(matrix_core PRIVATE matrix_core/openmp_multiplier.cpp)
-    target_compile_definitions(matrix_core PUBLIC WITH_OPENMP)
-    target_link_libraries(matrix_core PUBLIC OpenMP::OpenMP_CXX) 
-endif()
-
-
 if(ENABLE_CUDA)
     message(STATUS "Configuring CUDA backends for matrix_core")
     target_sources(matrix_core PRIVATE
@@ -41,11 +32,13 @@ if(ENABLE_CUDA)
 endif()
 
 
-if(VECTORIZATION_MODE STREQUAL "AVX2")
-    message(STATUS "Configuring AVX2 backend for matrix_core")
-    target_sources(matrix_core PRIVATE matrix_core/avx2_multiplier.cpp)
+if(VECTORIZATION_MODE STREQUAL "AVX2" AND ENABLE_OMP)
+    message(STATUS "Configuring OMP+AVX2 backend for matrix_core")
+    target_sources(matrix_core PRIVATE matrix_core/ompavx2_multiplier.cpp)
     target_compile_options(matrix_core PRIVATE -mavx2)
     target_compile_definitions(matrix_core PUBLIC WITH_AVX2)
+    target_compile_definitions(matrix_core PUBLIC WITH_OPENMP)
+    target_link_libraries(matrix_core PUBLIC OpenMP::OpenMP_CXX)
 endif()
 
 

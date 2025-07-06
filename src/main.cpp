@@ -23,18 +23,14 @@ int main(int argc, char const *argv[])
     std::unique_ptr<MatrixTransform::IMultiplier> multiplier;
     multiplier = Factory::createMultiplier(configFilePath);
 
-    Matrix a(2, 2);
-    Matrix b(2, 2);
-    
-    a << 2, 2,
-         3, 4;
-    
-    b << 5, 6,
-         7, 8;
-    
+    Matrix a(1000, 1000);
+    Matrix b(1000, 1000);
+
+    a.setRandom();
+    b.setRandom();
+
     try {
         Matrix result = multiplier->multiply(a, b);
-        std::cout << "Result of multiplication:\n" << result << std::endl;
     } catch (const std::invalid_argument& e) {
         std::cerr << "Error: " << e.what() << std::endl;
     }

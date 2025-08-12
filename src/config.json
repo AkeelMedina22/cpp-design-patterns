@@ -1,4 +1,4 @@
 {
-  "backend": "cuBLAS",
+  "backend": "NEON",
   "log_level": "info"
 }

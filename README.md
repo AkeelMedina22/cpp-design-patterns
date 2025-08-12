@@ -7,17 +7,14 @@ A matrix multiplication library written in C++. This project serves as a learnin
 
 **Key Feature:** New **multiplier implementations** (e.g., single-threaded CPU, CUDA-accelerated GPU, OpenCL) can be registered and used via the factory without requiring modifications to the factory itself. Each multiplier is generated using a config, and such, it may be useful, for example, in performance testing multiple algorithms/hyperparameters.
 
+Read more about this project on my [blog](https://akeelmedina22.github.io/posts/2025-07/cpp-design-patterns/)!
+
 **Current Status:**
-* Includes a registry that works as follows:
-    - Static initialization order MUST create the `CPURegistrar` object defined in `*_multiplier.cpp` before main.
-    - The constructor of `MultiplierRegistrar` initializes the `MultiplierRegistry` using `getInstance` (Meyers Singleton Pattern).
-    - All `IMultiplier` implementations will thus have their 'recipe' stored in the Registry before main.
-    - By default, a Registration of the same name will be overwritten.
-    - Move semantics are utilized for the efficient transfer of ownership of unique_ptr from Multiplier to Registry. 
+* Includes a registry that contains all Multiplier implementations.
 * Includes a single-threaded CPU multiplier implementation using Eigen.
+* Includes CUDA and OpenMP implementations for comparison (with SIMD-> AVX2+NEON).
 * Includes a globally accessible Logger singleton for handling application-wide logging.
 * All backends are created and configured via a central JSON config file.
-* (Future: CUDA and OpenMP implementations planned).
 
 **Dependencies:**
 * C++17 (for thread-safe static variables, move semantics, smart pointers, and `try_emplace`)
@@ -27,21 +24,27 @@ A matrix multiplication library written in C++. This project serves as a learnin
 
 ## Building and Running
 
-1.  **Configure with CMake:**
+1. **Clone the Repository:**
+    ```bash
+    git clone git@github.com:AkeelMedina22/cpp-design-patterns.git
+    git submodule update --init --recursive
+    ```
+    
+2.  **Configure with CMake:**
     ```bash
     mkdir build
     cd build
     cmake ..
     ```
 
-2.  **Build the project:**
+3.  **Build the project:**
     ```bash
     make
     ```
 
-3.  **Run the example application:**
+4.  **Run the example application:**
     ```bash
-    src/matrix_app ../src/config_cpu.json
+    src/matrix_app ../src/config.json
     ```
 
 ## How to Use 

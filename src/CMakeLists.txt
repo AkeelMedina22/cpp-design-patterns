@@ -40,5 +40,12 @@ if(VECTORIZATION_MODE STREQUAL "AVX2" AND ENABLE_OPENMP)
 endif()
 
 
+if(VECTORIZATION_MODE STREQUAL "NEON")
+    message(STATUS "Configuring NEON backend for matrix_core")
+    target_sources(matrix_core PRIVATE matrix_core/neon_multiplier.cpp)
+    target_compile_definitions(matrix_core PUBLIC WITH_NEON)
+endif()
+
+
 add_executable(matrix_app main.cpp)
 target_link_libraries(matrix_app PRIVATE matrix_core)
